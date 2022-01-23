@@ -18,9 +18,9 @@
 metadata {
     definition (name: "Eyedro Energy Sensor", namespace: "hubitat", author: "Greg Billings") {
         capability "Energy Meter"
-	capability "Power Meter"
-	capability "Configuration"
-	capability "Sensor"
+		capability "Power Meter"
+		capability "Configuration"
+		capability "Sensor"
         capability "Refresh"
         capability "Polling"
         
@@ -70,12 +70,12 @@ private LOGGING_ENABLED() { loggingEnabled }
  * Hubitat DTH Lifecycle Functions
  **/
 void installed() {
-    resetDisplay()
+    reset()
     poll()
 }
 
 void initialize() {
-    resetDisplay()
+    reset()
     poll()
 }
 
