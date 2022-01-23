@@ -18,9 +18,9 @@
 metadata {
     definition (name: "Eyedro Energy Sensor", namespace: "hubitat", author: "Greg Billings") {
         capability "Energy Meter"
-		capability "Power Meter"
-		capability "Configuration"
-		capability "Sensor"
+	capability "Power Meter"
+	capability "Configuration"
+	capability "Sensor"
         capability "Refresh"
         capability "Polling"
         
