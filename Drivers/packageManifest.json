@@ -1,0 +1,19 @@
+
+   
+{
+  "packageName": "Eyedro Home Energy Monitor",
+  "author": "Greg Billings",
+  "version": "1.0.0",
+  "minimumHEVersion": "2.2.0",
+  "dateReleased": "2022-01-22",
+  "releaseNotes": "1.0.0: first version: - reads Power Factor, Watts, Amps, Voltage on a set interval",
+  "drivers": [
+    {
+      "id": "b89fcc26-c397-4c5c-a3c3-bf07dfa5e27e",
+      "name": "Eyedro Home Energy Monitor",
+      "namespace": "diosadentro",
+      "location": "https://raw.githubusercontent.com/diosadentro/Hubitat/main/Drivers/EyedroHomeEnergyMonitor.groovy",
+      "required": false
+    }
+  ]
+}
