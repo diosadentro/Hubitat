@@ -1,0 +1,16 @@
+{
+  "author": "Greg Billings",
+  "minimumHEVersion": "2.2.1",
+  "gitHubUri": "https://github.com/diosadentro/hubitat",
+  "payPalUrl": "https://www.paypal.com/paypalme/diosadentro",
+  "packages":[
+  {
+  "name":"SmartWings Zigbee Shades",
+	"category": "Control",
+      "tags": [
+        "Window Coverings",
+	      "Zigbee"
+      ],  
+  "location": "",
+  "description": ""
+  }
