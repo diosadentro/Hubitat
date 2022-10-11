@@ -7,10 +7,12 @@
   {
   "name":"SmartWings Zigbee Shades",
 	"category": "Control",
-      "tags": [
-        "Window Coverings",
-	      "Zigbee"
-      ],  
+  "tags": [
+    "Window Coverings",
+    "Zigbee"
+  ],  
   "location": "",
   "description": ""
   }
+]
+}
