@@ -2,7 +2,7 @@
 
 # Prerequisites
 
-Follow the instructions that came with your shades or visit [Smartwingshome.com](https://www.smartwingshome.com/) to setup shades. This driver does not control limits, speed, remote configuration, etc. so all that must be completed prior to utilizing this driver.
+Follow the instructions that came with your shades or visit [Smartwingshome.com](https://www.smartwingshome.com/?ref=15) to setup shades. This driver does not control limits, speed, remote configuration, etc. so all that must be completed prior to utilizing this driver.
 
 # Installation Options
 
@@ -12,7 +12,7 @@ Follow the instructions that came with your shades or visit [Smartwingshome.com]
 # Product Links
 
 Links to purchase the Smartwings Zigbee Shades.
-* [SmartWings Motorized Light Filtering Roller Shades 70% Blackout Safari](https://www.smartwingshome.com/products/smartwings-motorized-light-filtering-roller-shades-70-blackout-safari). The ones I've test this on are both inside and outside mount, all motor on the right, Zigbee Smart Motor option, with and without a valance, standard rollback side.
+* [SmartWings Motorized Light Filtering Roller Shades 70% Blackout Safari](https://www.smartwingshome.com/products/smartwings-motorized-light-filtering-roller-shades-70-blackout-safari?ref=15). The ones I've test this on are both inside and outside mount, all motor on the right, Zigbee Smart Motor option, with and without a valance, standard rollback side.
 
 
 # Capabilities
