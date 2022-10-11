@@ -4,15 +4,15 @@
   "gitHubUri": "https://github.com/diosadentro/hubitat",
   "payPalUrl": "https://www.paypal.com/paypalme/diosadentro",
   "packages":[
-  {
-  "name":"SmartWings Zigbee Shades",
-	"category": "Control",
-  "tags": [
-    "Window Coverings",
-    "Zigbee"
-  ],  
-  "location": "",
-  "description": ""
-  }
-]
+    {
+    "name":"SmartWings Zigbee Shades",
+    "category": "Control",
+    "tags": [
+      "Window Coverings",
+      "Zigbee"
+    ],  
+    "location": "https://raw.githubusercontent.com/diosadentro/Hubitat/main/Packages/Smartwings/packageManifest.json",
+    "description": "Control your Smartwings Motor Shades Zigbee model. Motor type WM25/L-Z"
+    }
+  ]
 }

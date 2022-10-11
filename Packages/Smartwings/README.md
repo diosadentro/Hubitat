@@ -7,7 +7,7 @@ Follow the instructions that came with your shades or visit [Smartwingshome.com]
 # Installation Options
 
 * **[Recommended]** [Hubitat Package Manager]()
-* Raw code https://github.com/diosadentro/hubitat-smartwings-shades
+* Raw code https://raw.githubusercontent.com/diosadentro/Hubitat/main/Packages/Smartwings/SmartWings%20Zigbee%20Shades.groovy
 
 # Product Links
 

@@ -2,7 +2,7 @@
   "packageName": "SmartWings Zigbee Shades",
   "author": "Greg Billings",
   "version": "1.0.0",
-  "minimumHEVersion": "0.0",
+  "minimumHEVersion": "2.2.1",
   "releaseNotes" : "1.0.0 (2022-10-10) * Initial Release for support of Smartwings WM25/L-Z shades",
   "dateReleased": "2022-10-10",
   "drivers": [
@@ -10,7 +10,7 @@
       "id": "d44765ae-a371-4f20-8163-e3b559403192",
       "name": "SmartWings Motor Shades",
       "namespace": "smartwings",
-      "location": "https://raw.githubusercontent.com/diosadentro/hubitat-smartwings-shades/main/SmartWings%20Zigbee%20Shades.groovy",
+      "location": "https://raw.githubusercontent.com/diosadentro/Hubitat/main/Packages/Smartwings/SmartWings%20Zigbee%20Shades.groovy",
       "required": true
     }
   ]
