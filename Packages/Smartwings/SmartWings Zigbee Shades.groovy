@@ -23,7 +23,7 @@ import groovy.json.JsonOutput
 metadata {
 	definition (name: "SmartWings Motor Shades", namespace: "smartwings", author: "Gregory Billings") {
 		capability "WindowShade"
-    capability "SwitchLevel"
+		capability "SwitchLevel"
 		capability "Battery"
 		capability "Refresh"
 		capability "Configuration"
@@ -33,7 +33,7 @@ metadata {
 
 	preferences {
 		input("debugEnable", "bool", title: "Enable debug logging?")
-    input("invertLevel", "bool", title: "Invert Level?")
+		input("invertLevel", "bool", title: "Invert Level?")
 	}
 }
 
