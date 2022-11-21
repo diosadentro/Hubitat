@@ -172,17 +172,19 @@ def parse(String description) {
 private Map parseReportAttributeMessage(String description) {
 	Map descMap = zigbee.parseDescriptionAsMap(description)
 	Map resultMap = [:]
+	
 	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == BATTERY_PERCENTAGE_REMAINING) {
-        def batteryLevel = zigbee.convertHexToInt(descMap.value)
-        def batteryValue = Math.min(100, Math.max(0, batteryLevel))
-        
 		if (debugEnable) log.debug "parseDescriptionAsMap() --- Battery: $batteryValue"
+		
+        	def batteryLevel = zigbee.convertHexToInt(descMap.value)
+        	def batteryValue = Math.min(100, Math.max(0, batteryLevel))
         
-        resultMap.name = "battery"
-        resultMap.unit = "%"
-        resultMap.value = batteryValue
-        resultMap.displayed = true
+        	resultMap.name = "battery"
+        	resultMap.unit = "%"
+        	resultMap.value = batteryValue
+        	resultMap.displayed = true
 	}
+	
 	else if (descMap.clusterInt == CLUSTER_WINDOWCOVERING && descMap.attrInt == WINDOWCOVERING_ATTR_LIFTPERCENTAGE) {
 		def levelValue = Integer.parseInt(descMap.value, 16)
         
