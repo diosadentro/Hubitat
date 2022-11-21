@@ -15,7 +15,8 @@
  *
  * VERSION HISTORY
  *                                  
- * 1.0.0 (2022-10-10) [Greg Billings] - Initial Support. Mostly works minus battery percentage
+ * 1.0.0 (2022-10-02) [Greg Billings] - Initial Commit
+ * 1.0.1 (2022-11-21) [Greg Billings] - Fix for Battery Level matching configuration from https://github.com/SmartThingsCommunity/SmartThingsPublic/blob/master/devicetypes/smartthings/zigbee-window-shade-battery.src/zigbee-window-shade-battery.groovy. Thanks to equis for contacting Smartwings for the smartthings driver.
  */
 
 import groovy.json.JsonOutput
@@ -23,7 +24,7 @@ import groovy.json.JsonOutput
 metadata {
 	definition (name: "SmartWings Motor Shades", namespace: "smartwings", author: "Gregory Billings") {
 		capability "WindowShade"
-		capability "SwitchLevel"
+        capability "SwitchLevel"
 		capability "Battery"
 		capability "Refresh"
 		capability "Configuration"
@@ -33,17 +34,17 @@ metadata {
 
 	preferences {
 		input("debugEnable", "bool", title: "Enable debug logging?")
-		input("invertLevel", "bool", title: "Invert Level?")
+        input("invertLevel", "bool", title: "Invert Level?")
 	}
 }
 
 //Declare Clusters
 private getCLUSTER_POWER() {0x0001}
-private getPOWER_ATTR_BATTERY() {0x0021}
 private getCLUSTER_WINDOWCOVERING() {0x0102}
 private getWINDOWCOVERING_ATTR_LIFTPERCENTAGE() {0x0008}
 private getWINDOWCOVERING_CMD_STOP() {0x02}
 private getWINDOWCOVERING_CMD_GOTOLIFTPERCENTAGE() {0x05}
+private getBATTERY_PERCENTAGE_REMAINING() { 0x0021 }
 
 def getLastShadeLevel() {
 	device.currentState("shadeLevel") ? device.currentValue("shadeLevel") : (device.currentState("level") ? device.currentValue("level") : 0) // Try shadeLevel, if not use level, if not 0
@@ -141,10 +142,11 @@ def configure() {
 	sendEvent(name: "supportedWindowShadeCommands", value: JsonOutput.toJson(["open", "close", "stop"]), displayed: false)
 
 	def attrs_refresh = zigbee.readAttribute(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE) +
-						zigbee.readAttribute(CLUSTER_POWER, POWER_ATTR_BATTERY)
+						zigbee.readAttribute(CLUSTER_POWER, BATTERY_PERCENTAGE_REMAINING)
 
 	def cmds = zigbee.configureReporting(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE, 0x20, 1, 3600, 0x00) +
-			   zigbee.configureReporting(CLUSTER_POWER, POWER_ATTR_BATTERY, 0x20, 1, 3600, 0x01)
+			   //zigbee.configureReporting(CLUSTER_POWER, POWER_ATTR_BATTERY, 0x20, 1, 3600, 0x01) +
+               zigbee.configureReporting(zigbee.POWER_CONFIGURATION_CLUSTER, BATTERY_PERCENTAGE_REMAINING, DataType.UINT8, 30, 21600, 0x01)
 
 	if (debugEnable) log.info "configure() --- cmds: $cmds"
     
@@ -161,18 +163,19 @@ def parse(String description) {
 
 		if (map.name == "level") {
 			result = [result, createEvent([name: "shadeLevel", value: map.value, unit: map.unit])]
-		}
+		} 
 
 		if (debugEnable) log.debug "parse() --- returned: $result"
-		return result
+		    return result
 	}
 }
 
 private Map parseReportAttributeMessage(String description) {
 	Map descMap = zigbee.parseDescriptionAsMap(description)
 	Map resultMap = [:]
-	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == POWER_ATTR_BATTERY) {
-		def batteryValue = Math.round(Integer.parseInt(descMap.value))
+	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == BATTERY_PERCENTAGE_REMAINING) {
+        def batteryLevel = zigbee.convertHexToInt(descMap.value)
+        def batteryValue = Math.min(100, Math.max(0, batteryLevel))
         
 		if (debugEnable) log.debug "parseDescriptionAsMap() --- Battery: $batteryValue"
         
