@@ -1,10 +1,10 @@
 {
   "packageName": "SmartWings Zigbee Shades",
   "author": "Greg Billings",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minimumHEVersion": "2.2.1",
-  "releaseNotes" : "1.0.0 (2022-10-10) * Initial Release for support of Smartwings WM25/L-Z shades",
-  "dateReleased": "2022-10-10",
+  "releaseNotes" : "1.0.1 (2022-11-21) * Fix for Battery Level. Thanks to equis for contacting Smartwings for the smartthings driver!",
+  "dateReleased": "2022-11-21",
   "drivers": [
     {
       "id": "d44765ae-a371-4f20-8163-e3b559403192",
