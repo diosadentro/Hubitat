@@ -1,10 +1,10 @@
 {
   "packageName": "SmartWings Zigbee Shades",
   "author": "Greg Billings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minimumHEVersion": "2.2.1",
-  "releaseNotes" : "1.0.1 (2022-11-21) * Fix for Battery Level. Thanks to equis for contacting Smartwings for the smartthings driver!",
-  "dateReleased": "2022-11-21",
+  "releaseNotes" : "1.0.2 (2022-11-23) * Fix for position and level synchronization. Also fixes issue with missing setLevel function and removed unneeded shadeLevel property.",
+  "dateReleased": "2022-11-23",
   "drivers": [
     {
       "id": "d44765ae-a371-4f20-8163-e3b559403192",
