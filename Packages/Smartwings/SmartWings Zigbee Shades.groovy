@@ -83,15 +83,9 @@ def close() {
 }
 
 // Send Command through setShadeLevel()
-def setLevel(value, duration) {
-    if (debugEnable) log.info "setLevel($value)"
+def setLevel(value, duration = null) {
+    if (debugEnable) log.info "setLevel($value, $duration)"
     return setShadeLevel(value)
-}
-
-// Send Command through setShadeLevel()
-def setLevel(value) {
-    if (debugEnable) log.info "setLevel($value)"
-    return setLevel(value, 0)
 }
 
 // Send Command through setShadeLevel()
@@ -152,7 +146,6 @@ def configure() {
 						zigbee.readAttribute(CLUSTER_POWER, BATTERY_PERCENTAGE_REMAINING)
 
 	def cmds = zigbee.configureReporting(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE, 0x20, 1, 3600, 0x00) +
-			   //zigbee.configureReporting(CLUSTER_POWER, POWER_ATTR_BATTERY, 0x20, 1, 3600, 0x01) +
                zigbee.configureReporting(zigbee.POWER_CONFIGURATION_CLUSTER, BATTERY_PERCENTAGE_REMAINING, DataType.UINT8, 30, 21600, 0x01)
 
 	if (debugEnable) log.info "configure() --- cmds: $cmds"
