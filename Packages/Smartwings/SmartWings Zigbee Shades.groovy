@@ -17,6 +17,7 @@
  *                                  
  * 1.0.0 (2022-10-02) [Greg Billings] - Initial Commit
  * 1.0.1 (2022-11-21) [Greg Billings] - Fix for Battery Level matching configuration from https://github.com/SmartThingsCommunity/SmartThingsPublic/blob/master/devicetypes/smartthings/zigbee-window-shade-battery.src/zigbee-window-shade-battery.groovy. Thanks to equis for contacting Smartwings for the smartthings driver.
+ * 1.0.2 (2022-11-23) [Greg Billings] - Fix for position and level synchronization. Also fixes issue with missing setLevel function and removed unneeded shadeLevel property.
  */
 
 import groovy.json.JsonOutput
@@ -47,7 +48,7 @@ private getWINDOWCOVERING_CMD_GOTOLIFTPERCENTAGE() {0x05}
 private getBATTERY_PERCENTAGE_REMAINING() { 0x0021 }
 
 def getLastShadeLevel() {
-	device.currentState("shadeLevel") ? device.currentValue("shadeLevel") : (device.currentState("level") ? device.currentValue("level") : 0) // Try shadeLevel, if not use level, if not 0
+	device.currentState("level") ? device.currentValue("level") : 0
 }
 
 def stopPositionChange() {
@@ -61,8 +62,8 @@ def setShadeLevel(value) {
 	if (debugEnable) log.info "setShadeLevel ($value)"
     if(invertLevel) value = 100 - value
 
-	sendEvent(name:"level", value: value, unit:"%", displayed: false)
-	sendEvent(name:"shadeLevel", value: value, unit:"%")
+	sendEvent(name:"level", value: value, unit:"%")
+    sendEvent(name:"position", value: value, unit:"%", displayed: false)
 
     return zigbee.command(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_CMD_GOTOLIFTPERCENTAGE, zigbee.convertToHexString(value.toInteger(),2))
 }
@@ -85,6 +86,12 @@ def close() {
 def setLevel(value, duration) {
     if (debugEnable) log.info "setLevel($value)"
     return setShadeLevel(value)
+}
+
+// Send Command through setShadeLevel()
+def setLevel(value) {
+    if (debugEnable) log.info "setLevel($value)"
+    return setLevel(value, 0)
 }
 
 // Send Command through setShadeLevel()
@@ -145,7 +152,8 @@ def configure() {
 						zigbee.readAttribute(CLUSTER_POWER, BATTERY_PERCENTAGE_REMAINING)
 
 	def cmds = zigbee.configureReporting(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE, 0x20, 1, 3600, 0x00) +
-                   zigbee.configureReporting(zigbee.POWER_CONFIGURATION_CLUSTER, BATTERY_PERCENTAGE_REMAINING, DataType.UINT8, 30, 21600, 0x01)
+			   //zigbee.configureReporting(CLUSTER_POWER, POWER_ATTR_BATTERY, 0x20, 1, 3600, 0x01) +
+               zigbee.configureReporting(zigbee.POWER_CONFIGURATION_CLUSTER, BATTERY_PERCENTAGE_REMAINING, DataType.UINT8, 30, 21600, 0x01)
 
 	if (debugEnable) log.info "configure() --- cmds: $cmds"
     
@@ -161,7 +169,7 @@ def parse(String description) {
 		def result = map ? createEvent(map) : null
 
 		if (map.name == "level") {
-			result = [result, createEvent([name: "shadeLevel", value: map.value, unit: map.unit])]
+			result = [result, createEvent([name: "position", value: map.value, unit: map.unit])]
 		} 
 
 		if (debugEnable) log.debug "parse() --- returned: $result"
@@ -172,19 +180,17 @@ def parse(String description) {
 private Map parseReportAttributeMessage(String description) {
 	Map descMap = zigbee.parseDescriptionAsMap(description)
 	Map resultMap = [:]
-	
 	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == BATTERY_PERCENTAGE_REMAINING) {
-		if (debugEnable) log.debug "parseDescriptionAsMap() --- Battery: $batteryValue"
-		
-        	def batteryLevel = zigbee.convertHexToInt(descMap.value)
-        	def batteryValue = Math.min(100, Math.max(0, batteryLevel))
+        def batteryLevel = zigbee.convertHexToInt(descMap.value)
+        def batteryValue = Math.min(100, Math.max(0, batteryLevel))
         
-        	resultMap.name = "battery"
-        	resultMap.unit = "%"
-        	resultMap.value = batteryValue
-        	resultMap.displayed = true
+		if (debugEnable) log.debug "parseDescriptionAsMap() --- Battery: $batteryValue"
+        
+        resultMap.name = "battery"
+        resultMap.unit = "%"
+        resultMap.value = batteryValue
+        resultMap.displayed = true
 	}
-	
 	else if (descMap.clusterInt == CLUSTER_WINDOWCOVERING && descMap.attrInt == WINDOWCOVERING_ATTR_LIFTPERCENTAGE) {
 		def levelValue = Integer.parseInt(descMap.value, 16)
         
