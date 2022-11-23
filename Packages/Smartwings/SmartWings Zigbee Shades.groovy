@@ -82,7 +82,7 @@ def close() {
 }
 
 // Send Command through setShadeLevel()
-def setLevel(value, duration) {
+def setLevel(value) {
     if (debugEnable) log.info "setLevel($value)"
     return setShadeLevel(value)
 }
@@ -192,7 +192,7 @@ private Map parseReportAttributeMessage(String description) {
 		
         state.level = levelValue
         resultMap.value = levelValue
-        resultMap.name = "level"
+        resultMap.name = "position"  // originally "level"
 		resultMap.unit = "%"
 		resultMap.displayed = true
         setWindowShade(levelValue)
