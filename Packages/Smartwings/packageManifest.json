@@ -1,9 +1,9 @@
 {
   "packageName": "SmartWings Zigbee Shades",
   "author": "Greg Billings",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minimumHEVersion": "2.2.1",
-  "releaseNotes" : "1.0.2 (2022-11-23) * Fix for position and level synchronization. Also fixes issue with missing setLevel function and removed unneeded shadeLevel property.",
+  "releaseNotes" : "1.0.3 (2023-09-24) * Adds a new override to support Apple Home through HomeBridge. Apple home utilizes setPosition and position with inverse levels. Setting the new option will inverse these levels to support apple home while leaving other values untouched. SetPosition and position should thus not be used for automation or interaction through hubitat.",
   "dateReleased": "2022-11-23",
   "drivers": [
     {
