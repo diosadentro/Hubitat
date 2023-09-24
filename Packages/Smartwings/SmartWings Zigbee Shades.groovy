@@ -15,9 +15,7 @@
  *
  * VERSION HISTORY
  *                                  
- * 1.0.0 (2022-10-02) [Greg Billings] - Initial Commit
- * 1.0.1 (2022-11-21) [Greg Billings] - Fix for Battery Level matching configuration from https://github.com/SmartThingsCommunity/SmartThingsPublic/blob/master/devicetypes/smartthings/zigbee-window-shade-battery.src/zigbee-window-shade-battery.groovy. Thanks to equis for contacting Smartwings for the smartthings driver.
- * 1.0.2 (2022-11-23) [Greg Billings] - Fix for position and level synchronization. Also fixes issue with missing setLevel function and removed unneeded shadeLevel property.
+ * 1.0.0 (2022-10-10) [Greg Billings] - Initial Support. Mostly works minus battery percentage
  */
 
 import groovy.json.JsonOutput
@@ -36,24 +34,31 @@ metadata {
 	preferences {
 		input("debugEnable", "bool", title: "Enable debug logging?")
         input("invertLevel", "bool", title: "Invert Level?")
+        input("appleHomeSupport", "bool", title: "Apple Home Support? Override SetPosition")
 	}
 }
 
 //Declare Clusters
 private getCLUSTER_POWER() {0x0001}
+private getPOWER_ATTR_BATTERY() {0x0021}
 private getCLUSTER_WINDOWCOVERING() {0x0102}
 private getWINDOWCOVERING_ATTR_LIFTPERCENTAGE() {0x0008}
 private getWINDOWCOVERING_CMD_STOP() {0x02}
 private getWINDOWCOVERING_CMD_GOTOLIFTPERCENTAGE() {0x05}
-private getBATTERY_PERCENTAGE_REMAINING() { 0x0021 }
 
 def getLastShadeLevel() {
-	device.currentState("level") ? device.currentValue("level") : 0
+    def value = 0;
+    if(device.currentState("shadeLevel"))
+        value = device.curentState("shadeLevel")
+    else if(device.currentState("level"))
+        value = device.curentState("level")
+            
+    if(invertLevel) value = 100 - value
+    return value;
 }
 
 def stopPositionChange() {
 	if (debugEnable) log.info "stopPositionChange()"
-	def shadeState = device.latestValue("windowShade")
     sendEvent(name: "windowShade", value: "stopping")
     return zigbee.command(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_CMD_STOP)
 }
@@ -62,48 +67,61 @@ def setShadeLevel(value) {
 	if (debugEnable) log.info "setShadeLevel ($value)"
     if(invertLevel) value = 100 - value
 
-	sendEvent(name:"level", value: value, unit:"%")
-    sendEvent(name:"position", value: value, unit:"%", displayed: false)
+	sendEvent(name:"level", value: value, unit:"%", displayed: false)
+	sendEvent(name:"shadeLevel", value: value, unit:"%")
+    sendEvent(name:"position", value: value, displayed: false)
+    log.info "Setting shade level value to $value"
 
     return zigbee.command(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_CMD_GOTOLIFTPERCENTAGE, zigbee.convertToHexString(value.toInteger(),2))
 }
 
 //Send Command through setShadeLevel()
 def open() {
+    def value = 0
 	if (debugEnable) log.info "open()"
 	sendEvent(name: "windowShade", value: "opening")
-    return setShadeLevel(0)
+    return setShadeLevel(value)
 }
 
 //Send Command through setShadeLevel()
 def close() {
+    def value = 100
 	if (debugEnable) log.info "close()"
 	sendEvent(name: "windowShade", value: "closing")
-    return setShadeLevel(100)
+    return setShadeLevel(value)
 }
 
 // Send Command through setShadeLevel()
-def setLevel(value, duration = null) {
-    if (debugEnable) log.info "setLevel($value, $duration)"
+def setLevel(value, duration) {
+    if (debugEnable) log.info "setLevel($value)"
     return setShadeLevel(value)
 }
 
 // Send Command through setShadeLevel()
 def on() {
     if (debugEnable) log.info "on()"
-    return setShadeLevel(0)
+    return open()
 }
 
 // Send Command through setShadeLevel()
 def off() {
     if (debugEnable) log.info "off()"
-    return setShadeLevel(100)
+    return close()
 }
 
 // Send Command through setShadeLevel()
 def setPosition(value) {
-    if (debugEnable) log.info "setPosition()"
+    if(appleHomeSupport) value = 100 - value
+    if (debugEnable) log.info "setPosition($value)"
     return setShadeLevel(value)
+}
+
+def startPositionChange(value) {
+    if(debugEnable) log.info "startPositionChange($value)"  
+    if(value == "close")
+        close()
+    else
+        open()
 }
 
 // Set the shade position text for tiles and other status indicators
@@ -112,13 +130,18 @@ def setWindowShade(value) {
 		sendEvent(name: "windowShade", value: "partially open")
 	}
 	else if (value == 0) {
-		sendEvent(name: "windowShade", value: "open")
+        if(invertLevel)
+		    sendEvent(name: "windowShade", value: "closed")
+        else
+            sendEvent(name: "windowShade", value: "open")
 	}
 	else {
-		sendEvent(name: "windowShade", value: "closed")
+        if(invertLevel)
+		    sendEvent(name: "windowShade", value: "open")
+        else
+            sendEvent(name: "windowShade", value: "closed")
 	}
 }
-
 
 //Refresh command
 def refresh() {
@@ -143,10 +166,10 @@ def configure() {
 	sendEvent(name: "supportedWindowShadeCommands", value: JsonOutput.toJson(["open", "close", "stop"]), displayed: false)
 
 	def attrs_refresh = zigbee.readAttribute(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE) +
-						zigbee.readAttribute(CLUSTER_POWER, BATTERY_PERCENTAGE_REMAINING)
+						zigbee.readAttribute(CLUSTER_POWER, POWER_ATTR_BATTERY)
 
 	def cmds = zigbee.configureReporting(CLUSTER_WINDOWCOVERING, WINDOWCOVERING_ATTR_LIFTPERCENTAGE, 0x20, 1, 3600, 0x00) +
-               zigbee.configureReporting(zigbee.POWER_CONFIGURATION_CLUSTER, BATTERY_PERCENTAGE_REMAINING, DataType.UINT8, 30, 21600, 0x01)
+			   zigbee.configureReporting(CLUSTER_POWER, POWER_ATTR_BATTERY, 0x20, 1, 3600, 0x01)
 
 	if (debugEnable) log.info "configure() --- cmds: $cmds"
     
@@ -162,20 +185,21 @@ def parse(String description) {
 		def result = map ? createEvent(map) : null
 
 		if (map.name == "level") {
-			result = [result, createEvent([name: "position", value: map.value, unit: map.unit])]
-		} 
+            def homeSupportValue = map.value
+            if(appleHomeSupport) homeSupportValue = 100 - homeSupportValue
+			result = [result, createEvent([name: "shadeLevel", value: map.value, unit: map.unit]), createEvent([name: "position", value: homeSupportValue, unit: map.unit])]
+		}
 
 		if (debugEnable) log.debug "parse() --- returned: $result"
-		    return result
+		return result
 	}
 }
 
 private Map parseReportAttributeMessage(String description) {
 	Map descMap = zigbee.parseDescriptionAsMap(description)
 	Map resultMap = [:]
-	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == BATTERY_PERCENTAGE_REMAINING) {
-        def batteryLevel = zigbee.convertHexToInt(descMap.value)
-        def batteryValue = Math.min(100, Math.max(0, batteryLevel))
+	if (descMap.clusterInt == CLUSTER_POWER && descMap.attrInt == POWER_ATTR_BATTERY) {
+		def batteryValue = Math.round(Integer.parseInt(descMap.value))
         
 		if (debugEnable) log.debug "parseDescriptionAsMap() --- Battery: $batteryValue"
         
@@ -186,6 +210,7 @@ private Map parseReportAttributeMessage(String description) {
 	}
 	else if (descMap.clusterInt == CLUSTER_WINDOWCOVERING && descMap.attrInt == WINDOWCOVERING_ATTR_LIFTPERCENTAGE) {
 		def levelValue = Integer.parseInt(descMap.value, 16)
+        if(invertLevel) levelValue = 100 - levelValue
         
         if (debugEnable) log.debug "parseDescriptionAsMap() --- Level: $levelValue"
 		
