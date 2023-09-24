@@ -21,7 +21,7 @@
 import groovy.json.JsonOutput
 
 metadata {
-	definition (name: "Old SmartWings Motor Shades", namespace: "smartwings", author: "Gregory Billings") {
+	definition (name: "SmartWings Motor Shades", namespace: "smartwings", author: "Gregory Billings") {
 		capability "WindowShade"
         capability "SwitchLevel"
 		capability "Battery"
@@ -94,7 +94,6 @@ def close() {
 // Send Command through setShadeLevel()
 def setLevel(value, duration) {
     if (debugEnable) log.info "setLevel($value)"
-    if(appleHomeSupport) value = 100 - value
     return setShadeLevel(value)
 }
 
@@ -187,7 +186,6 @@ def parse(String description) {
 
 		if (map.name == "level") {
             def homeSupportValue = map.value
-            //if(invertLevel || appleHomeSupport) map.value = 100 - map.value
             if(appleHomeSupport) homeSupportValue = 100 - homeSupportValue
 			result = [result, createEvent([name: "shadeLevel", value: map.value, unit: map.unit]), createEvent([name: "position", value: homeSupportValue, unit: map.unit])]
 		}
